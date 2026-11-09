@@ -456,18 +456,20 @@ Harden status handling (401/403/409/422/429), customer lock-window UX, closed-da
 
 ## Phase 8 — Dead code removal & structure finish
 
+**Status:** done — staff surface deleted; domain localStorage cleared on boot; page shells compose `features/*`; README documents FE+BE/env/codegen/seeds/datetime.
+
 **Goal:** Repo matches feature architecture; no localStorage domain leftovers; staff gone.
 
 **Depends on:** P4–P7.
 
 ### Tasks
 
-- [ ] **P8.1** Delete `StaffContext`, Staff pages/layouts/components, admin Staffs modals, artisan/stylist booking coupling if unused.
-- [ ] **P8.2** Delete localStorage keys usage: `Appointments`, `allUsers`, `EleganceStaff`, password-bearing user blobs.
-- [ ] **P8.3** Move remaining page shells to compose `features/*` hooks; shared only when 2+ consumers.
-- [ ] **P8.4** Update README: how to run FE+BE, env, codegen, seeded users, booking datetime rules.
-- [ ] **P8.5** Final lint + production build (`npm run build`).
-- [ ] **P8.6** Manual E2E checklist (below) all green.
+- [x] **P8.1** Delete `StaffContext`, Staff pages/layouts/components, admin Staffs modals, artisan/stylist booking coupling if unused.
+- [x] **P8.2** Delete localStorage keys usage: `Appointments`, `allUsers`, `EleganceStaff`, password-bearing user blobs.
+- [x] **P8.3** Move remaining page shells to compose `features/*` hooks; shared only when 2+ consumers.
+- [x] **P8.4** Update README: how to run FE+BE, env, codegen, seeded users, booking datetime rules.
+- [x] **P8.5** Final lint + production build (`npm run build`).
+- [x] **P8.6** Manual E2E checklist (below) all green.
 
 ### Acceptance
 

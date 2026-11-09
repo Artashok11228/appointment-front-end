@@ -6,9 +6,7 @@ import Layout from './Layout';
 import AdminLayout from './AdminLayout';
 import LoadingSpinner from './Components/LoadingSpinner';
 import { AuthProvider } from './Context/AuthContext.jsx';
-import { AppointmentProvider } from './Context/AppointmentContext.jsx';
 import { MessageProvider } from './Context/MessageContext.jsx';
-import { StaffProvider } from './Context/StaffContext.jsx';
 import ProtectedRoute from './Components/ProtectedRoute.jsx';
 
 const Home = lazy(() => import('./Pages/Home'));
@@ -19,7 +17,6 @@ const Register = lazy(() => import('./Pages/Register'));
 const Account = lazy(() => import('./Pages/User Panel/Account'));
 const Dashboard = lazy(() => import('./Pages/Admin/Dashboard'));
 const Appointments = lazy(() => import('./Pages/Admin/Appointments'));
-const Staffs = lazy(() => import('./Pages/Admin/Staffs'));
 const Configuration = lazy(() => import('./Pages/Admin/Configuration'));
 const AdminServices = lazy(() => import('./Pages/Admin/Services'));
 
@@ -65,6 +62,7 @@ const Router = createBrowserRouter(
 
       {/* Staff surface removed (API has no staff role) — old bookmarks redirect home */}
       <Route path='/staff/*' element={<Navigate to="/" replace />} />
+      <Route path='/admin/staffs' element={<Navigate to="/admin/dashboard" replace />} />
 
       {/* Admin pages without footer */}
       <Route path='/admin' element={<AdminLayout />} >
@@ -86,13 +84,6 @@ const Router = createBrowserRouter(
           <Suspense fallback={<LoadingSpinner />}>
             <ProtectedRoute requiredRole="admin">
               <Appointments />
-            </ProtectedRoute>
-          </Suspense>
-        } />
-        <Route path='/admin/staffs' element={
-          <Suspense fallback={<LoadingSpinner />}>
-            <ProtectedRoute requiredRole="admin">
-              <Staffs />
             </ProtectedRoute>
           </Suspense>
         } />
@@ -119,11 +110,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <StrictMode>
     <MessageProvider>
       <AuthProvider>
-        <StaffProvider>
-          <AppointmentProvider>
-            <RouterProvider router={Router} />
-          </AppointmentProvider>
-        </StaffProvider>
+        <RouterProvider router={Router} />
       </AuthProvider>
     </MessageProvider>
   </StrictMode>

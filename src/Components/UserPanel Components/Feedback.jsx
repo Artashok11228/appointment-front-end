@@ -20,14 +20,11 @@ function Feedback() {
         }))
     }
 
-    // Handle feedback submit
-    const handleFeedbackSubmit = async (e) => {
+    // Local-only thank-you UX until a feedback endpoint exists in OpenAPI.
+    const handleFeedbackSubmit = (e) => {
         e.preventDefault()
-        await localStorage.setItem("FeedbackData", JSON.stringify(feedbackData))
-        console.log('Feedback submitted:', feedbackData)
         showMessage('success', 'Thank you for your feedback! We appreciate you taking the time to share your thoughts with us.')
 
-        // Reset form after submission
         setFeedbackData({
             userId: currentUser?.id,
             rating: 5,

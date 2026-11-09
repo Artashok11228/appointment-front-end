@@ -17,12 +17,16 @@ import {
 
 const AuthContext = createContext();
 
-const LEGACY_USERS_KEY = "allUsers";
-const LEGACY_CURRENT_USER_KEYS = ["currentUser"];
+const LEGACY_DOMAIN_KEYS = [
+  "allUsers",
+  "currentUser",
+  "Appointments",
+  "EleganceStaff",
+  "FeedbackData",
+];
 
-function clearLegacyAuthStorage() {
-  localStorage.removeItem(LEGACY_USERS_KEY);
-  for (const key of LEGACY_CURRENT_USER_KEYS) {
+function clearLegacyDomainStorage() {
+  for (const key of LEGACY_DOMAIN_KEYS) {
     localStorage.removeItem(key);
     sessionStorage.removeItem(key);
   }
@@ -68,7 +72,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    clearLegacyAuthStorage();
+    clearLegacyDomainStorage();
 
     setUnauthorizedHandler(() => {
       setCurrentUser(null);
@@ -161,14 +165,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  /** No profile-update endpoint in OpenAPI yet (see Phase 7). */
-  const updatedUser = async () => {
-    return {
-      success: false,
-      error: "Profile update is not available yet",
-    };
-  };
-
   const value = {
     currentUser,
     loading,
@@ -176,7 +172,6 @@ export function AuthProvider({ children }) {
     register,
     login,
     logout,
-    updatedUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

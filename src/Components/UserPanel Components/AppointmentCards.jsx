@@ -13,7 +13,12 @@ import {
   canModifyAppointment,
   modificationBlockReason,
 } from '../../features/appointments/lib/canModifyAppointment'
-import { formatAppointmentDisplay, isBookingOpenDayUtc } from '../../shared/lib'
+import {
+  acceptBookingOpenDateInput,
+  BOOKING_WEEKDAY_MESSAGE,
+  formatAppointmentDisplay,
+  isBookingOpenDayUtc,
+} from '../../shared/lib'
 
 function statusStyle(status) {
     switch (status) {
@@ -99,7 +104,7 @@ function AppointmentCards({ appointment, onChanged }) {
             return
         }
         if (!isBookingOpenDayUtc(newDate)) {
-            showMessage('warning', 'Bookings are Mon–Fri only (UTC).')
+            showMessage('warning', BOOKING_WEEKDAY_MESSAGE)
             return
         }
 
@@ -236,7 +241,12 @@ function AppointmentCards({ appointment, onChanged }) {
                         type="date"
                         value={newDate}
                         onChange={(e) => {
-                            setNewDate(e.target.value)
+                            const accepted = acceptBookingOpenDateInput(e.target.value)
+                            if (!accepted.ok) {
+                                showMessage('warning', accepted.reason)
+                                return
+                            }
+                            setNewDate(accepted.value)
                             setSelectedSlot(null)
                             setSlotError(null)
                         }}

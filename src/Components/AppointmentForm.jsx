@@ -7,7 +7,11 @@ import { formatServicePrice } from '../features/services/lib/formatServicePrice'
 import { useServiceAvailability } from '../features/availability/hooks'
 import SlotPicker from '../features/availability/components/SlotPicker'
 import { useBookAppointment } from '../features/appointments/hooks'
-import { isBookingOpenDayUtc } from '../shared/lib'
+import {
+    acceptBookingOpenDateInput,
+    BOOKING_WEEKDAY_MESSAGE,
+    isBookingOpenDayUtc,
+} from '../shared/lib'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 
@@ -103,7 +107,7 @@ const Step1Selection = memo(({
 })
 
 const Step2Schedule = memo(({
-    date, setDate,
+    date, onDateChange,
     selectedSlotIso, onSelectSlot,
     availability,
     startsAtError,
@@ -117,7 +121,7 @@ const Step2Schedule = memo(({
                 <input
                     type="date"
                     value={date}
-                    onChange={(e) => setDate(e.target.value)}
+                    onChange={(e) => onDateChange(e.target.value)}
                     className="w-full font-black border-2 md:border-5 border-[#454545] p-2 px-3 md:px-4 py-3 md:py-4 text-sm md:text-base text-champagne-muted tracking-tight bg-obsidian hover:border-champagne transition-colors focus:outline-none focus:border-champagne"
                     required
                 />
@@ -237,7 +241,12 @@ function AppointmentBookForm() {
     }
 
     const handleDateChange = (nextDate) => {
-        setDate(nextDate)
+        const accepted = acceptBookingOpenDateInput(nextDate)
+        if (!accepted.ok) {
+            showMessage('warning', accepted.reason)
+            return
+        }
+        setDate(accepted.value)
         setSelectedSlot(null)
         setStartsAtError(null)
     }
@@ -267,7 +276,7 @@ function AppointmentBookForm() {
             return
         }
         if (!isBookingOpenDayUtc(date)) {
-            showMessage('warning', 'Bookings are Mon–Fri only (UTC). Pick a weekday.')
+            showMessage('warning', BOOKING_WEEKDAY_MESSAGE)
             return
         }
 
@@ -340,7 +349,7 @@ function AppointmentBookForm() {
                 <div className="form-step hidden w-full">
                     <Step2Schedule
                         date={date}
-                        setDate={handleDateChange}
+                        onDateChange={handleDateChange}
                         selectedSlotIso={selectedSlot?.startsAtIso ?? null}
                         onSelectSlot={handleSelectSlot}
                         availability={availability}

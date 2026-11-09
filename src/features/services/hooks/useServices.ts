@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ApiError } from '../../../shared/api';
+import { toApiErrorMessage } from '../../../shared/api';
 import { listServices, type Service } from '../api';
 
 export function useServices() {
@@ -16,13 +16,7 @@ export function useServices() {
       setServices(data);
     } catch (err) {
       setServices([]);
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : 'Failed to load services',
-      );
+      setError(toApiErrorMessage(err, 'Failed to load services'));
     } finally {
       setLoading(false);
     }

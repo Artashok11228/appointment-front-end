@@ -47,10 +47,8 @@ export function AdminServicesPage() {
     if (form.open && form.mode === 'edit') {
       const result = await update(form.service.id, body);
       if (!result.ok) {
-        if (result.status === 403) {
-          setServerError(result.message || 'You are not allowed to update services.');
-        } else {
-          setServerError(result.message);
+        setServerError(result.message);
+        if (result.bindFields) {
           setFieldErrors(result.errors ?? null);
         }
         return;
@@ -63,10 +61,8 @@ export function AdminServicesPage() {
 
     const result = await create(body);
     if (!result.ok) {
-      if (result.status === 403) {
-        setServerError(result.message || 'You are not allowed to create services.');
-      } else {
-        setServerError(result.message);
+      setServerError(result.message);
+      if (result.bindFields) {
         setFieldErrors(result.errors ?? null);
       }
       return;
@@ -83,16 +79,7 @@ export function AdminServicesPage() {
 
     const result = await remove(target.id);
     if (!result.ok) {
-      if (result.status === 409) {
-        showMessage('error', result.message);
-      } else if (result.status === 403) {
-        showMessage(
-          'error',
-          result.message || 'You are not allowed to delete services.',
-        );
-      } else {
-        showMessage('error', result.message);
-      }
+      showMessage('error', result.message);
       return;
     }
 

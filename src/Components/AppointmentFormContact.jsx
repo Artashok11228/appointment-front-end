@@ -7,7 +7,11 @@ import { formatServicePrice } from '../features/services/lib/formatServicePrice'
 import { useServiceAvailability } from '../features/availability/hooks'
 import SlotPicker from '../features/availability/components/SlotPicker'
 import { useBookAppointment } from '../features/appointments/hooks'
-import { isBookingOpenDayUtc } from '../shared/lib'
+import {
+    acceptBookingOpenDateInput,
+    BOOKING_WEEKDAY_MESSAGE,
+    isBookingOpenDayUtc,
+} from '../shared/lib'
 
 function AppointmentFormContact() {
     const { isAuthenticated, loading: authLoading } = useAuth()
@@ -60,7 +64,12 @@ function ContactBookForm() {
     }
 
     const handleDateChange = (nextDate) => {
-        setDate(nextDate)
+        const accepted = acceptBookingOpenDateInput(nextDate)
+        if (!accepted.ok) {
+            showMessage('warning', accepted.reason)
+            return
+        }
+        setDate(accepted.value)
         setSelectedSlot(null)
         setStartsAtError(null)
     }
@@ -86,7 +95,7 @@ function ContactBookForm() {
             return
         }
         if (!isBookingOpenDayUtc(date)) {
-            showMessage('warning', 'Bookings are Mon–Fri only (UTC). Pick a weekday.')
+            showMessage('warning', BOOKING_WEEKDAY_MESSAGE)
             return
         }
 

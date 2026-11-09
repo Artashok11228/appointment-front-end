@@ -293,6 +293,8 @@ Decouple booking data source from src/data/services.js. No booking POST yet. Lin
 
 ## Phase 4 — Customer appointments (book, list, cancel, reschedule)
 
+**Status:** done — `features/appointments` via generated client; customer book/list/cancel/reschedule on API; single service + naive `starts_at`; 120‑min lock UX; no localStorage `Appointments`. Admin appointments still stubbed until P6.
+
 **Goal:** End-to-end customer booking flow matches `x-frontend-cookbook.suggestedFlows.customerBooking`.
 
 **Depends on:** P2, P3.
@@ -309,19 +311,19 @@ Decouple booking data source from src/data/services.js. No booking POST yet. Lin
 
 ### Tasks
 
-- [ ] **P4.1** Replace `AppointmentContext` localStorage CRUD with hooks calling API (`features/appointments`). Keep a thin provider only if cross-tree cache needed; prefer query-style hooks.
-- [ ] **P4.2** Rewrite booking UI (`AppointmentForm` / contact form / user Booking):
+- [x] **P4.1** Replace `AppointmentContext` localStorage CRUD with hooks calling API (`features/appointments`). Keep a thin provider only if cross-tree cache needed; prefer query-style hooks.
+- [x] **P4.2** Rewrite booking UI (`AppointmentForm` / contact form / user Booking):
   - auth required to book
   - select **one** service (not multi)
   - pick calendar date (respect Mon–Fri UX)
   - load availability; pick slot
   - submit naive `starts_at` via `isoToNaiveUtc`
   - on 422 `starts_at` → show message + refresh availability
-- [ ] **P4.3** Customer appointment list: map API fields (`starts_at`, `status`, nested `service.price`) into cards; pagination (`page`, `meta`).
-- [ ] **P4.4** Cancel: confirm modal → POST cancel; handle 409 `message` toast; hide/disable if not `confirmed` or within 120‑min lock (customer).
-- [ ] **P4.5** Reschedule: reopen slot picker for **same** `service_id`; PATCH; handle 409/422.
-- [ ] **P4.6** Remove stylist assignment, `items[]`, guest booking paths, old statuses from customer UI.
-- [ ] **P4.7** Filters optional: `status`, `from`, `to` for customer “My appointments”.
+- [x] **P4.3** Customer appointment list: map API fields (`starts_at`, `status`, nested `service.price`) into cards; pagination (`page`, `meta`).
+- [x] **P4.4** Cancel: confirm modal → POST cancel; handle 409 `message` toast; hide/disable if not `confirmed` or within 120‑min lock (customer).
+- [x] **P4.5** Reschedule: reopen slot picker for **same** `service_id`; PATCH; handle 409/422.
+- [x] **P4.6** Remove stylist assignment, `items[]`, guest booking paths, old statuses from customer UI.
+- [x] **P4.7** Filters optional: `status`, `from`, `to` for customer “My appointments”.
 
 ### Acceptance
 
@@ -564,7 +566,7 @@ Ask a human before coding if needed:
 | P1 Roles & remove staff surface | done | Auth still localStorage until P2; staff files kept for P8 |
 | P2 Auth Sanctum | done | Verified: login/register/logout/me + UI redirects |
 | P3 Services & availability | done | hooks/api + booking/admin catalog decoupled; POST still P4 |
-| P4 Customer appointments | pending | |
+| P4 Customer appointments | done | hooks/api + customer book/list/cancel/reschedule; admin stub until P6 |
 | P5 Admin services CRUD | pending | |
 | P6 Admin appointments & stats | pending | |
 | P7 Hardening | pending | |

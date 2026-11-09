@@ -7,10 +7,11 @@ function LoginInput() {
     const [password, setPassword] = useState("")
     const [rememberMe, setRememberMe] = useState(false)
     const [message, setMessage] = useState("")
+    const [fieldErrors, setFieldErrors] = useState({})
+    const [submitting, setSubmitting] = useState(false)
     const { login, currentUser } = useAuth()
     const navigate = useNavigate()
 
-    // Effect to handle navigation after login
     useEffect(() => {
         if (currentUser) {
             if (currentUser.role === "admin") {
@@ -19,7 +20,7 @@ function LoginInput() {
                 navigate("/");
             }
         }
-    }, [currentUser, message, navigate]);
+    }, [currentUser, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -27,16 +28,31 @@ function LoginInput() {
             setMessage("You are already logged in!")
             return
         }
+
+        setSubmitting(true)
+        setMessage("")
+        setFieldErrors({})
+
         const result = await login({ email, password, rememberMe });
+        setSubmitting(false)
+
         if (result.success) {
-            setMessage("Login successful!")
             setEmail("")
             setPassword("")
-            // Navigation will be handled by the useEffect hook
-        } else {
-            setMessage(result.error)
+            return
         }
+
+        if (result.errors) {
+            setFieldErrors(result.errors)
+            const emailError = result.errors.email?.[0]
+            const passwordError = result.errors.password?.[0]
+            setMessage(emailError || passwordError || result.error)
+            return
+        }
+
+        setMessage(result.error)
     }
+
     return (
         <div className="login-box flex flex-col rounded-lg shadow-lg text-white w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto">
             <div className="head bg-obsidian-elevated p-4 sm:p-5 text-center rounded-t-2xl text-champagne text-2xl sm:text-3xl md:text-4xl font-black uppercase" style={{ textShadow: "0 4px 4px rgba(0, 0, 0, 0.25)" }}>
@@ -45,8 +61,18 @@ function LoginInput() {
             <div className="login-form bg-obsidian-surface rounded-b-2xl pb-4 pt-2">
                 <form className='p-4 sm:p-6 md:p-8' onSubmit={handleSubmit} method="post">
                     <div className="input-forms space-y-4 sm:space-y-5 md:space-y-7 mb-2">
-                        <input type="email" name="userMail" value={email} id="userMail" placeholder="EMAIL" onChange={(e) => setEmail(e.target.value)} className="w-full font-black border-4 border-[#454545] p-2 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base placeholder-[#454545] text-[#dddddd] tracking-tight hover:border-champagne transition-colors focus:outline-none focus:border-champagne rounded-md" required />
-                        <input type="password" name="userPassword" id="userPassword" value={password} placeholder="PASSWORD" onChange={(e) => setPassword(e.target.value)} className="w-full font-black border-4 border-[#454545] p-2 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base placeholder-[#454545] text-[#dddddd] tracking-tight hover:border-champagne transition-colors focus:outline-none focus:border-champagne rounded-md" required />
+                        <div>
+                            <input type="email" name="userMail" value={email} id="userMail" placeholder="EMAIL" onChange={(e) => setEmail(e.target.value)} className="w-full font-black border-4 border-[#454545] p-2 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base placeholder-[#454545] text-[#dddddd] tracking-tight hover:border-champagne transition-colors focus:outline-none focus:border-champagne rounded-md" required />
+                            {fieldErrors.email?.[0] && (
+                                <p className="mt-1 text-sm text-red-400">{fieldErrors.email[0]}</p>
+                            )}
+                        </div>
+                        <div>
+                            <input type="password" name="userPassword" id="userPassword" value={password} placeholder="PASSWORD" onChange={(e) => setPassword(e.target.value)} className="w-full font-black border-4 border-[#454545] p-2 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base placeholder-[#454545] text-[#dddddd] tracking-tight hover:border-champagne transition-colors focus:outline-none focus:border-champagne rounded-md" required />
+                            {fieldErrors.password?.[0] && (
+                                <p className="mt-1 text-sm text-red-400">{fieldErrors.password[0]}</p>
+                            )}
+                        </div>
                     </div>
                     <div className="remember-forgot flex justify-between items-center mt-4 sm:mt-5 mb-10 mx-1">
                         <label className='flex items-center cursor-pointer'>
@@ -56,7 +82,7 @@ function LoginInput() {
                         <a href="#!" className='text-champagne hover:text-champagne text-xs sm:text-sm font-bold tracking-tight transition-all duration-300 hover:underline'>Forgot Your Password?</a>
                     </div>
                     <div className="submit-button">
-                        <input type="submit" value="Login" className="w-full border-4 sm:border-5 border-champagne hover:border-white text-white font-black p-2 sm:p-3 px-4 sm:px-6 hover:bg-[#d28127] transition-colors cursor-pointer uppercase text-base sm:text-lg md:text-xl" />
+                        <input type="submit" value={submitting ? "Logging in..." : "Login"} disabled={submitting} className="w-full border-4 sm:border-5 border-champagne hover:border-white text-white font-black p-2 sm:p-3 px-4 sm:px-6 hover:bg-[#d28127] transition-colors cursor-pointer uppercase text-base sm:text-lg md:text-xl disabled:opacity-60 disabled:cursor-not-allowed" />
                     </div>
                     {message && <p className="mt-3 text-center text-champagne">{message}</p>}
                     <div className="no-account mt-5 sm:mt-6 md:mt-7">

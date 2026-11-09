@@ -6,6 +6,7 @@ export {
   getAuthToken,
   setAuthToken,
   clearAuthToken,
+  setUnauthorizedHandler,
   AUTH_TOKEN_KEY,
 } from './client';
 export { ApiError, toApiError } from './errors';

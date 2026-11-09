@@ -9,6 +9,7 @@ import {
 
 export type UseAppointmentsFilters = {
   status?: AppointmentStatus | '';
+  service_id?: number | '';
   from?: string;
   to?: string;
   page?: number;
@@ -27,6 +28,9 @@ function normalizeFilters(
   const query: ListAppointmentsQuery = {};
 
   if (filters.status) query.status = filters.status;
+  if (typeof filters.service_id === 'number' && filters.service_id > 0) {
+    query.service_id = filters.service_id;
+  }
   if (filters.from) query.from = filters.from;
   if (filters.to) query.to = filters.to;
   if (filters.page && filters.page > 0) query.page = filters.page;
@@ -41,6 +45,10 @@ export function useAppointments(filters: UseAppointmentsFilters = {}) {
   const [error, setError] = useState<string | null>(null);
 
   const status = filters.status || undefined;
+  const serviceId =
+    typeof filters.service_id === 'number' && filters.service_id > 0
+      ? filters.service_id
+      : undefined;
   const from = filters.from || undefined;
   const to = filters.to || undefined;
   const page = filters.page || 1;
@@ -51,7 +59,13 @@ export function useAppointments(filters: UseAppointmentsFilters = {}) {
 
     try {
       const result = await listAppointments(
-        normalizeFilters({ status, from, to, page }),
+        normalizeFilters({
+          status,
+          service_id: serviceId,
+          from,
+          to,
+          page,
+        }),
       );
       setAppointments(result.data);
       setMeta({
@@ -73,7 +87,7 @@ export function useAppointments(filters: UseAppointmentsFilters = {}) {
     } finally {
       setLoading(false);
     }
-  }, [status, from, to, page]);
+  }, [status, serviceId, from, to, page]);
 
   useEffect(() => {
     void refetch();

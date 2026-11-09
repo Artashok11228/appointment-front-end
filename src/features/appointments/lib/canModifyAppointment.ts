@@ -22,3 +22,19 @@ export function modificationBlockReason(
   }
   return null;
 }
+
+/** Admin may cancel/reschedule any confirmed appointment (API bypasses the lock). */
+export function canAdminModifyAppointment(
+  appointment: Pick<Appointment, 'status'>,
+): boolean {
+  return appointment.status === 'confirmed';
+}
+
+export function adminModificationBlockReason(
+  appointment: Pick<Appointment, 'status'>,
+): string | null {
+  if (appointment.status !== 'confirmed') {
+    return 'Only a confirmed appointment can be changed.';
+  }
+  return null;
+}

@@ -271,11 +271,23 @@ The production-optimized output is written to `Elegance/dist/`.
 bun run preview
 ```
 
-### Lint
+### Lint / typecheck
 
 ```bash
 bun run lint
+bun run typecheck
+# or: npm run lint && npm run typecheck
 ```
+
+### API client codegen
+
+OpenAPI contract lives at `openapi/appointment-api.yaml`. Regenerate typed schema after YAML changes:
+
+```bash
+npm run generate:api
+```
+
+Output: `src/shared/api/generated/schema.ts` (do not hand-edit). HTTP wrapper: `src/shared/api/client.ts`.
 
 ### Troubleshooting
 
@@ -344,13 +356,30 @@ Global confirmation dialog rendered via `createPortal` to escape all parent `ove
 
 ## Configuration
 
-The project requires no environment variables. All configurable behaviour lives in source files:
+### API (Phase 0+)
+
+| Variable / path | Purpose |
+| --- | --- |
+| `VITE_API_BASE_URL` | Laravel API root including `/api` (default `http://localhost:8000/api`) — see `.env.example` |
+| `openapi/appointment-api.yaml` | Source of truth OpenAPI contract |
+| `src/shared/api/generated/schema.ts` | Generated types — **do not hand-edit** |
+| `src/shared/api/client.ts` | `openapi-fetch` client: Bearer token + `Accept: application/json` |
+| `src/shared/lib/datetime.ts` | UTC naive `starts_at` helpers + 120‑min lock |
+
+```bash
+# Regenerate client types after OpenAPI changes
+npm run generate:api
+```
+
+Auth token storage key: `auth_token` (`localStorage` or `sessionStorage`).
+
+### Legacy local UI config
 
 | File                           | Purpose                                                              |
 | ------------------------------ | -------------------------------------------------------------------- |
 | `vite.config.js`               | Vite plugins, React alias deduplication, `optimizeDeps` pre-bundling |
 | `src/index.css`                | Tailwind 4 `@import`, custom `@keyframes`, global resets             |
-| `src/data/services.js`         | Service catalogue and pricing                                        |
+| `src/data/services.js`         | Service catalogue and pricing (being replaced by API)                |
 | `src/Context/StaffContext.jsx` | Default seed staff data (name, schedule, specialties, commission)    |
 | `src/Context/AuthContext.jsx`  | Default admin credentials seed (`admin@admin.com` / `admin`)         |
 

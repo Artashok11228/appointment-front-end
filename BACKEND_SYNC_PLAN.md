@@ -118,26 +118,28 @@ Do **not** keep wiring these to the live API (no endpoints exist):
 
 ## Phase 0 — Contract, tooling, env, generated client
 
+**Status:** done — OpenAPI in-repo; `openapi-typescript` + `openapi-fetch`; `generate:api`; shared client + datetime helpers. No feature UI changes.
+
 **Goal:** OpenAPI is in-repo; codegen works; env base URL exists; zero feature UI changes required beyond smoke import.
 
 **Depends on:** nothing.
 
 ### Tasks
 
-- [ ] **P0.1** Add `openapi/appointment-api.yaml` with the full Appointment Booking API contract (the OpenAPI pasted by the product owner).
-- [ ] **P0.2** Add `.env.example` + Vite env: `VITE_API_BASE_URL=http://localhost:8000/api`.
-- [ ] **P0.3** Choose and wire codegen (prefer typed client from OpenAPI). Add scripts: `generate:api`, run once, commit generated output or CI-generate — follow repo convention; document in README snippet.
-- [ ] **P0.4** Create thin `src/shared/api/client.ts` (or `.js`) that:
+- [x] **P0.1** Add `openapi/appointment-api.yaml` with the full Appointment Booking API contract (the OpenAPI pasted by the product owner).
+- [x] **P0.2** Add `.env.example` + Vite env: `VITE_API_BASE_URL=http://localhost:8000/api`.
+- [x] **P0.3** Choose and wire codegen (prefer typed client from OpenAPI). Add scripts: `generate:api`, run once, commit generated output or CI-generate — follow repo convention; document in README snippet.
+- [x] **P0.4** Create thin `src/shared/api/client.ts` (or `.js`) that:
   - uses base URL from env
   - always sets `Accept: application/json`
   - attaches Bearer token from a single token storage key (e.g. `auth_token`)
   - parses JSON; maps HTTP errors into a small `ApiError` shape: `{ status, message, errors? }`
-- [ ] **P0.5** Add `src/shared/lib/datetime.js|ts` helpers:
+- [x] **P0.5** Add `src/shared/lib/datetime.js|ts` helpers:
   - `isoToNaiveUtc(iso)` → `"YYYY-MM-DD HH:mm:ss"` **without** converting to browser local if APP_TIMEZONE is UTC
   - `formatAppointmentDisplay(iso)` for UI
   - `isWithinModificationLock(startsAtIso, now = Date.now(), lockMinutes = 120)` for customer UX disable
   - constants: open hours Mon–Fri 09–17 UTC (document; do not invent different hours)
-- [ ] **P0.6** Smoke: import generated types/`operations` in a throwaway or shared index; `npm run lint` passes.
+- [x] **P0.6** Smoke: import generated types/`operations` in a throwaway or shared index; `npm run lint` passes.
 
 ### Acceptance
 
@@ -532,7 +534,7 @@ Ask a human before coding if needed:
 1. **Profile update / password change:** not in OpenAPI — keep read-only or wait for backend.
 2. **Marketing home static services images:** keep decorative static content vs bind to API names.
 3. **TS migration scope:** new code TS vs whole repo — prefer TS for `shared/` + `features/` only unless asked.
-4. **Codegen tool choice:** orval vs openapi-typescript + openapi-fetch — pick one in P0 and stick to it.
+4. **Codegen tool choice:** ~~orval vs openapi-typescript + openapi-fetch~~ — **picked:** `openapi-typescript` + `openapi-fetch` (P0).
 5. **Remember Me:** token in localStorage vs sessionStorage only (both OK; document).
 
 ---
@@ -554,7 +556,7 @@ Ask a human before coding if needed:
 
 | Phase | Status | Notes |
 |---|---|---|
-| P0 Contract & client | pending | |
+| P0 Contract & client | done | openapi-typescript + openapi-fetch; generated schema committed |
 | P1 Roles & remove staff surface | done | Auth still localStorage until P2; staff files kept for P8 |
 | P2 Auth Sanctum | pending | |
 | P3 Services & availability | pending | |

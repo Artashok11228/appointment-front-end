@@ -21,10 +21,6 @@ const Dashboard = lazy(() => import('./Pages/Admin/Dashboard'));
 const Appointments = lazy(() => import('./Pages/Admin/Appointments'));
 const Staffs = lazy(() => import('./Pages/Admin/Staffs'));
 const Configuration = lazy(() => import('./Pages/Admin/Configuration'));
-const StaffLayout = lazy(() => import('./StaffLayout'));
-const StaffDashboard = lazy(() => import('./Pages/Staff/StaffDashboard'));
-const StaffAppointments = lazy(() => import('./Pages/Staff/StaffAppointments'));
-const StaffProfile = lazy(() => import('./Pages/Staff/StaffProfile'));
 
 
 const Router = createBrowserRouter(
@@ -59,44 +55,15 @@ const Router = createBrowserRouter(
         } />
         <Route path='/account' element={
           <Suspense fallback={<LoadingSpinner />}>
-            <ProtectedRoute requiredRole="client">
+            <ProtectedRoute requiredRole="customer">
               <Account />
             </ProtectedRoute>
           </Suspense>
         } />
       </Route>
 
-      {/* Staff pages without footer */}
-      <Route path='/staff' element={<StaffLayout />} >
-        <Route index element={
-          <Suspense fallback={<LoadingSpinner />}>
-            <ProtectedRoute requiredRole="staff">
-              <Navigate to="/staff/dashboard" replace />
-            </ProtectedRoute>
-          </Suspense>
-        } />
-        <Route path='/staff/dashboard' element={
-          <Suspense fallback={<LoadingSpinner />}>
-            <ProtectedRoute requiredRole="staff">
-              <StaffDashboard />
-            </ProtectedRoute>
-          </Suspense>
-        } />
-        <Route path='/staff/appointments' element={
-          <Suspense fallback={<LoadingSpinner />}>
-            <ProtectedRoute requiredRole="staff">
-              <StaffAppointments />
-            </ProtectedRoute>
-          </Suspense>
-        } />
-        <Route path='/staff/profile' element={
-          <Suspense fallback={<LoadingSpinner />}>
-            <ProtectedRoute requiredRole="staff">
-              <StaffProfile />
-            </ProtectedRoute>
-          </Suspense>
-        } />
-      </Route>
+      {/* Staff surface removed (API has no staff role) — old bookmarks redirect home */}
+      <Route path='/staff/*' element={<Navigate to="/" replace />} />
 
       {/* Admin pages without footer */}
       <Route path='/admin' element={<AdminLayout />} >

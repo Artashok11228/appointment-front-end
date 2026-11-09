@@ -8,6 +8,7 @@ import { useServiceAvailability } from '../features/availability/hooks'
 import SlotPicker from '../features/availability/components/SlotPicker'
 import { useBookAppointment } from '../features/appointments/hooks'
 import { isBookingOpenDayUtc } from '../shared/lib'
+import { handleApiFailure } from '../shared/api'
 
 function AppointmentFormContact() {
     const { isAuthenticated, loading: authLoading } = useAuth()
@@ -60,6 +61,9 @@ function ContactBookForm() {
     }
 
     const handleDateChange = (nextDate) => {
+        if (nextDate && !isBookingOpenDayUtc(nextDate)) {
+            showMessage('warning', 'Bookings are Mon–Fri only (UTC). Pick a weekday.')
+        }
         setDate(nextDate)
         setSelectedSlot(null)
         setStartsAtError(null)
@@ -104,10 +108,17 @@ function ContactBookForm() {
             return
         }
 
-        const fieldMsg = result.errors?.starts_at?.[0]
         setSelectedSlot(null)
-        setStartsAtError(fieldMsg || result.message)
-        showMessage('error', result.message)
+        handleApiFailure(result, {
+            showMessage,
+            toastValidationSummary: true,
+            onFieldErrors: (errors) => {
+                setStartsAtError(errors.starts_at?.[0] || result.message)
+            },
+        })
+        if (!result.errors) {
+            setStartsAtError(result.message)
+        }
         if (result.status === 422) {
             await availability.refetch()
         }
@@ -184,6 +195,7 @@ function ContactBookForm() {
                     className="w-full bg-obsidian border border-[#454545] p-3 text-sm text-champagne-muted focus:border-champagne focus:outline-none"
                     required
                 />
+                <p className="mt-1 text-[10px] text-champagne-muted">Weekends are closed (UTC).</p>
             </div>
 
             <div>
@@ -197,6 +209,7 @@ function ContactBookForm() {
                     loading={availability.loading}
                     error={availability.error}
                     empty={availability.empty}
+                    closedDay={Boolean(date) && !isBookingOpenDayUtc(date)}
                     enabled={availability.enabled}
                     disabled={submitting}
                 />

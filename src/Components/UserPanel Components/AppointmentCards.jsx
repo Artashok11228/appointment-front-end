@@ -14,6 +14,7 @@ import {
   modificationBlockReason,
 } from '../../features/appointments/lib/canModifyAppointment'
 import { formatAppointmentDisplay, isBookingOpenDayUtc } from '../../shared/lib'
+import { handleApiFailure } from '../../shared/api'
 
 function statusStyle(status) {
     switch (status) {
@@ -43,6 +44,7 @@ function AppointmentCards({ appointment, onChanged }) {
     const ANIM_DURATION = 300
     const canModify = canModifyAppointment(appointment)
     const blockReason = modificationBlockReason(appointment)
+    const showModifyActions = appointment.status === 'confirmed'
     const serviceName = appointment.service?.name ?? `Service #${appointment.service_id}`
     const priceLabel = appointment.service
         ? formatServicePrice(appointment.service.price)
@@ -85,7 +87,7 @@ function AppointmentCards({ appointment, onChanged }) {
                     showMessage('success', 'Appointment cancelled successfully')
                     onChanged?.(result.appointment)
                 } else {
-                    showMessage('error', result.message)
+                    handleApiFailure(result, { showMessage })
                 }
                 setConfirmAction(null)
             },
@@ -114,10 +116,17 @@ function AppointmentCards({ appointment, onChanged }) {
             return
         }
 
-        const fieldMsg = result.errors?.starts_at?.[0]
         setSelectedSlot(null)
-        setSlotError(fieldMsg || result.message)
-        showMessage('error', result.message)
+        handleApiFailure(result, {
+            showMessage,
+            toastValidationSummary: true,
+            onFieldErrors: (errors) => {
+                setSlotError(errors.starts_at?.[0] || result.message)
+            },
+        })
+        if (!result.errors) {
+            setSlotError(result.message)
+        }
         if (result.status === 422) {
             await availability.refetch()
         }
@@ -188,29 +197,33 @@ function AppointmentCards({ appointment, onChanged }) {
                 </div>
             </div>
 
-            <div className={`grid grid-cols-2 gap-3 transition-opacity duration-300 ${isRescheduling ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
-                <button
-                    type="button"
-                    onClick={openReschedule}
-                    disabled={!canModify || cancelling}
-                    title={blockReason || undefined}
-                    className="flex justify-center items-center py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider bg-white/5 text-white hover:bg-champagne hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                >
-                    Reschedule
-                </button>
-                <button
-                    type="button"
-                    onClick={handleCancel}
-                    disabled={!canModify || cancelling}
-                    title={blockReason || undefined}
-                    className="flex justify-center items-center py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider border border-white/10 text-[#777] hover:border-rose-500/50 hover:text-rose-500 hover:bg-rose-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                >
-                    Cancel
-                </button>
-            </div>
+            {showModifyActions && (
+                <>
+                    <div className={`grid grid-cols-2 gap-3 transition-opacity duration-300 ${isRescheduling ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
+                        <button
+                            type="button"
+                            onClick={openReschedule}
+                            disabled={!canModify || cancelling}
+                            title={blockReason || undefined}
+                            className="flex justify-center items-center py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider bg-white/5 text-white hover:bg-champagne hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        >
+                            Reschedule
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={!canModify || cancelling}
+                            title={blockReason || undefined}
+                            className="flex justify-center items-center py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider border border-white/10 text-[#777] hover:border-rose-500/50 hover:text-rose-500 hover:bg-rose-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        >
+                            Cancel
+                        </button>
+                    </div>
 
-            {!canModify && blockReason && !isRescheduling && (
-                <p className="mt-3 text-[11px] text-[#777]">{blockReason}</p>
+                    {!canModify && blockReason && !isRescheduling && (
+                        <p className="mt-3 text-[11px] text-[#777]">{blockReason}</p>
+                    )}
+                </>
             )}
 
             <div
@@ -236,12 +249,17 @@ function AppointmentCards({ appointment, onChanged }) {
                         type="date"
                         value={newDate}
                         onChange={(e) => {
-                            setNewDate(e.target.value)
+                            const next = e.target.value
+                            if (next && !isBookingOpenDayUtc(next)) {
+                                showMessage('warning', 'Bookings are Mon–Fri only (UTC). Pick a weekday.')
+                            }
+                            setNewDate(next)
                             setSelectedSlot(null)
                             setSlotError(null)
                         }}
                         className="w-full bg-obsidian border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-champagne focus:outline-none transition-colors"
                     />
+                    <p className="mt-1 text-[10px] text-[#777]">Weekends are closed (UTC).</p>
                 </div>
 
                 <div>
@@ -256,6 +274,7 @@ function AppointmentCards({ appointment, onChanged }) {
                         loading={availability.loading}
                         error={availability.error}
                         empty={availability.empty}
+                        closedDay={Boolean(newDate) && !isBookingOpenDayUtc(newDate)}
                         enabled={availability.enabled}
                         disabled={rescheduling}
                     />

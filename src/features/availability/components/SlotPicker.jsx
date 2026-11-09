@@ -9,6 +9,8 @@ export default function SlotPicker({
   loading = false,
   error = null,
   empty = false,
+  /** True when the selected calendar day is outside Mon–Fri UTC open days. */
+  closedDay = false,
   enabled = false,
   disabled = false,
   className = '',
@@ -37,10 +39,12 @@ export default function SlotPicker({
     );
   }
 
-  if (empty) {
+  if (empty || closedDay) {
     return (
       <p className={`text-xs text-champagne-muted ${className}`}>
-        No free slots for this day (weekend, closed, or fully booked).
+        {closedDay
+          ? 'Closed day — bookings are Mon–Fri only (UTC). Pick a weekday.'
+          : 'No free slots for this day (closed or fully booked).'}
       </p>
     );
   }

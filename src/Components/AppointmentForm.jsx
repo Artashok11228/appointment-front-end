@@ -8,6 +8,7 @@ import { useServiceAvailability } from '../features/availability/hooks'
 import SlotPicker from '../features/availability/components/SlotPicker'
 import { useBookAppointment } from '../features/appointments/hooks'
 import { isBookingOpenDayUtc } from '../shared/lib'
+import { handleApiFailure } from '../shared/api'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 
@@ -121,6 +122,7 @@ const Step2Schedule = memo(({
                     className="w-full font-black border-2 md:border-5 border-[#454545] p-2 px-3 md:px-4 py-3 md:py-4 text-sm md:text-base text-champagne-muted tracking-tight bg-obsidian hover:border-champagne transition-colors focus:outline-none focus:border-champagne"
                     required
                 />
+                <p className="mt-1 text-[10px] text-champagne-muted">Weekends are closed (UTC).</p>
             </div>
 
             <div className="w-full">
@@ -134,6 +136,7 @@ const Step2Schedule = memo(({
                     loading={availability.loading}
                     error={availability.error}
                     empty={availability.empty}
+                    closedDay={Boolean(date) && !isBookingOpenDayUtc(date)}
                     enabled={availability.enabled}
                     disabled={submitting}
                 />
@@ -237,6 +240,9 @@ function AppointmentBookForm() {
     }
 
     const handleDateChange = (nextDate) => {
+        if (nextDate && !isBookingOpenDayUtc(nextDate)) {
+            showMessage('warning', 'Bookings are Mon–Fri only (UTC). Pick a weekday.')
+        }
         setDate(nextDate)
         setSelectedSlot(null)
         setStartsAtError(null)
@@ -286,10 +292,17 @@ function AppointmentBookForm() {
             return
         }
 
-        const fieldMsg = result.errors?.starts_at?.[0]
         setSelectedSlot(null)
-        setStartsAtError(fieldMsg || result.message)
-        showMessage('error', result.message)
+        handleApiFailure(result, {
+            showMessage,
+            toastValidationSummary: true,
+            onFieldErrors: (errors) => {
+                setStartsAtError(errors.starts_at?.[0] || result.message)
+            },
+        })
+        if (!result.errors) {
+            setStartsAtError(result.message)
+        }
         if (result.status === 422) {
             await availability.refetch()
         }

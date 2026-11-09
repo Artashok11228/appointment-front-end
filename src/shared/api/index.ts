@@ -11,3 +11,13 @@ export {
 } from './client';
 export { ApiError, toApiError } from './errors';
 export type { ApiErrorBody } from './errors';
+export {
+  handleApiFailure,
+  LOGIN_RATE_LIMIT_COOLDOWN_MS,
+} from './handleApiFailure';
+export type {
+  ApiFailureLike,
+  HandleApiFailureOptions,
+  HandleApiFailureResult,
+  MessageToaster,
+} from './handleApiFailure';

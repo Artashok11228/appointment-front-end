@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Pencil, Trash2, Scissors, RefreshCw } from 'lucide-react';
 import ConfirmModal from '../../../Components/ConfirmModal';
 import { useMessage } from '../../../Context/MessageContext';
+import { handleApiFailure } from '../../../shared/api';
 import type { Service, ServiceWrite } from '../api';
 import { formatServicePrice } from '../lib/formatServicePrice';
 import {
@@ -47,12 +48,15 @@ export function AdminServicesPage() {
     if (form.open && form.mode === 'edit') {
       const result = await update(form.service.id, body);
       if (!result.ok) {
-        if (result.status === 403) {
-          setServerError(result.message || 'You are not allowed to update services.');
-        } else {
-          setServerError(result.message);
-          setFieldErrors(result.errors ?? null);
-        }
+        handleApiFailure(result, {
+          showMessage,
+          onFieldErrors: (errors) => setFieldErrors(errors),
+        });
+        setServerError(
+          result.status === 403
+            ? result.message || 'You are not allowed to update services.'
+            : result.message,
+        );
         return;
       }
       showMessage('success', `Updated “${result.service.name}”.`);
@@ -63,12 +67,15 @@ export function AdminServicesPage() {
 
     const result = await create(body);
     if (!result.ok) {
-      if (result.status === 403) {
-        setServerError(result.message || 'You are not allowed to create services.');
-      } else {
-        setServerError(result.message);
-        setFieldErrors(result.errors ?? null);
-      }
+      handleApiFailure(result, {
+        showMessage,
+        onFieldErrors: (errors) => setFieldErrors(errors),
+      });
+      setServerError(
+        result.status === 403
+          ? result.message || 'You are not allowed to create services.'
+          : result.message,
+      );
       return;
     }
     showMessage('success', `Created “${result.service.name}”.`);
@@ -83,16 +90,7 @@ export function AdminServicesPage() {
 
     const result = await remove(target.id);
     if (!result.ok) {
-      if (result.status === 409) {
-        showMessage('error', result.message);
-      } else if (result.status === 403) {
-        showMessage(
-          'error',
-          result.message || 'You are not allowed to delete services.',
-        );
-      } else {
-        showMessage('error', result.message);
-      }
+      handleApiFailure(result, { showMessage });
       return;
     }
 

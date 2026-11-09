@@ -361,12 +361,12 @@ List files first; lint after. Do not build admin CRUD in this phase.
 
 ### Tasks
 
-- [ ] **P5.1** Admin Services page (new route e.g. `/admin/services`) or repurpose Configuration/extra nav — prefer dedicated Services admin.
-- [ ] **P5.2** Table: name, duration, price; actions edit/delete.
-- [ ] **P5.3** Create/Edit form validation matching `ServiceWrite`.
-- [ ] **P5.4** Delete confirm; show 409 message when history blocks delete.
-- [ ] **P5.5** 403 handling if non-admin hits mutations.
-- [ ] **P5.6** Wire AdminSidebar nav; remove reliance on static `services.js` for admin.
+- [x] **P5.1** Admin Services page (new route e.g. `/admin/services`) or repurpose Configuration/extra nav — prefer dedicated Services admin.
+- [x] **P5.2** Table: name, duration, price; actions edit/delete.
+- [x] **P5.3** Create/Edit form validation matching `ServiceWrite`.
+- [x] **P5.4** Delete confirm; show 409 message when history blocks delete.
+- [x] **P5.5** 403 handling if non-admin hits mutations.
+- [x] **P5.6** Wire AdminSidebar nav; remove reliance on static `services.js` for admin.
 
 ### Acceptance
 

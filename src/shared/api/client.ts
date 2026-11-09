@@ -25,6 +25,17 @@ export function clearAuthToken(): void {
   sessionStorage.removeItem(AUTH_TOKEN_KEY);
 }
 
+type UnauthorizedHandler = () => void;
+
+let unauthorizedHandler: UnauthorizedHandler | null = null;
+
+/** Register a global 401 handler (AuthProvider). Pass null to clear. */
+export function setUnauthorizedHandler(
+  handler: UnauthorizedHandler | null,
+): void {
+  unauthorizedHandler = handler;
+}
+
 function resolveBaseUrl(): string {
   const raw = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api';
   return raw.replace(/\/$/, '');
@@ -52,12 +63,27 @@ const authMiddleware: Middleware = {
   },
 };
 
+const unauthorizedMiddleware: Middleware = {
+  async onResponse({ response, request }) {
+    if (response.status === 401) {
+      clearAuthToken();
+      // Logout may return 401 for an already-revoked token; AuthProvider clears locally.
+      const path = new URL(request.url).pathname;
+      if (!path.endsWith('/logout')) {
+        unauthorizedHandler?.();
+      }
+    }
+    return response;
+  },
+};
+
 /** Typed OpenAPI client. Prefer this over hand-written fetch. */
 export const apiClient = createClient<paths>({
   baseUrl: resolveBaseUrl(),
 });
 
 apiClient.use(authMiddleware);
+apiClient.use(unauthorizedMiddleware);
 
 type ErrorPayload = {
   message?: string;

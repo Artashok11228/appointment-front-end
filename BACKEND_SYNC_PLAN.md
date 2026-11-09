@@ -198,6 +198,8 @@ Do not implement Sanctum yet unless already present. Minimal diffs. List files f
 
 ## Phase 2 — Auth feature (Sanctum) replacing localStorage users
 
+**Status:** done — Sanctum via generated client; token in local/session storage (Remember Me); `/me` boot; global 401 → clear + `/login`; register/login forms match API (no phone; `password_confirmation`; min 8). Manually verified against local backend (P2.8).
+
 **Goal:** Register/login/logout/me work against API; token persisted; 401 handled globally.
 
 **Depends on:** P0 (client), P1 (roles).
@@ -213,18 +215,18 @@ Do not implement Sanctum yet unless already present. Minimal diffs. List files f
 
 ### Tasks
 
-- [ ] **P2.1** `features/auth/api` wrappers around generated client (no duplicate types).
-- [ ] **P2.2** Rewrite `AuthContext` (or `features/auth` provider):
+- [x] **P2.1** `features/auth/api` wrappers around generated client (no duplicate types).
+- [x] **P2.2** Rewrite `AuthContext` (or `features/auth` provider):
   - store `token` + `user` (`id,name,email,role`)
   - on boot: if token → `GET /me`; on fail clear session
   - `login`/`register` save token; never store password
   - `logout` call API then clear; ignore network error still clear local
-- [ ] **P2.3** Token storage: `localStorage` vs `sessionStorage` based on Remember Me (token only, not password).
-- [ ] **P2.4** Update `RegisterInput`: drop phone validation; send `password_confirmation`; min password **8**; map 422 `errors` to fields; on success auto-login with returned token (API returns token on 201).
-- [ ] **P2.5** Update `LoginInput`: map 422 credential errors; redirect `admin` → `/admin/dashboard`, `customer` → `/` or `/account`.
-- [ ] **P2.6** Global 401 interceptor / handler: clear session → `/login` (per cookbook).
-- [ ] **P2.7** Remove seeded `admin@admin.com` local user logic and `allUsers` persistence for auth.
-- [ ] **P2.8** Manual verify with seeded `customer@example.com` / `admin@example.com` + `password`.
+- [x] **P2.3** Token storage: `localStorage` vs `sessionStorage` based on Remember Me (token only, not password).
+- [x] **P2.4** Update `RegisterInput`: drop phone validation; send `password_confirmation`; min password **8**; map 422 `errors` to fields; on success auto-login with returned token (API returns token on 201).
+- [x] **P2.5** Update `LoginInput`: map 422 credential errors; redirect `admin` → `/admin/dashboard`, `customer` → `/` or `/account`.
+- [x] **P2.6** Global 401 interceptor / handler: clear session → `/login` (per cookbook).
+- [x] **P2.7** Remove seeded `admin@admin.com` local user logic and `allUsers` persistence for auth.
+- [x] **P2.8** Manual verify with seeded `customer@example.com` / `admin@example.com` + `password`.
 
 ### Acceptance
 
@@ -558,7 +560,7 @@ Ask a human before coding if needed:
 |---|---|---|
 | P0 Contract & client | done | openapi-typescript + openapi-fetch; generated schema committed |
 | P1 Roles & remove staff surface | done | Auth still localStorage until P2; staff files kept for P8 |
-| P2 Auth Sanctum | pending | |
+| P2 Auth Sanctum | done | Verified: login/register/logout/me + UI redirects |
 | P3 Services & availability | pending | |
 | P4 Customer appointments | pending | |
 | P5 Admin services CRUD | pending | |

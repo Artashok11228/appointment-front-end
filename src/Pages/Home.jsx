@@ -38,7 +38,7 @@ import Header from '../Components/Header.jsx'
 import HeroCanvas from '../Components/HeroCanvas.jsx'
 import { useMagnetic } from '../hooks/useMagnetic.jsx'
 import { Link } from 'react-router-dom'
-import { useStaff } from '../Context/StaffContext.jsx'
+import { artisans } from '../data/artisans.js'
 
 function Home() {
     const heroRef = useRef(null)
@@ -47,9 +47,7 @@ function Home() {
     // Initialize Magnetic interaction engine
     useMagnetic();
 
-    // Load Artisans data
-    const { staff } = useStaff()
-    const featuredArtisans = staff.slice(0, 4)
+    const featuredArtisans = artisans.slice(0, 4)
 
     const servicesData = [
         {

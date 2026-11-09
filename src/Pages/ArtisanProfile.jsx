@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useStaff } from '../Context/StaffContext.jsx';
+import { getArtisanById } from '../data/artisans.js';
 import { customerReviews } from '../data/reviews.js';
 import Header from '../Components/Header.jsx';
 import barberImg from '../assets/BARBER.webp';
@@ -22,11 +22,10 @@ gsap.registerPlugin(ScrollTrigger);
 function ArtisanProfile() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { getStaffById, staff } = useStaff();
     const profileRef = useRef(null);
     useMagnetic();
 
-    const artisan = getStaffById(id);
+    const artisan = getArtisanById(id);
 
     useEffect(() => {
         // Scroll to top automatically when navigating to the profile
@@ -35,10 +34,10 @@ function ArtisanProfile() {
 
     // Redirect if not found
     useEffect(() => {
-        if (staff.length > 0 && !artisan) {
+        if (!artisan) {
             navigate('/', { replace: true });
         }
-    }, [staff, artisan, navigate]);
+    }, [artisan, navigate]);
 
     useGSAP(() => {
         if (!artisan) return;

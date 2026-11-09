@@ -249,6 +249,8 @@ Handle 401/422. Roles customer|admin only. List files first; lint after.
 
 ## Phase 3 — Services + Availability data layer
 
+**Status:** done — `features/services` + `features/availability` via generated client; booking/admin catalogs use API; `formatServicePrice` + slot options (ISO + naive); marketing `data/services.js` marked TODO. Booking POST still localStorage until P4.
+
 **Goal:** Authenticated app can list/get services and fetch day slots from API. Replace static catalog as the booking source of truth.
 
 **Depends on:** P0, P2.
@@ -265,11 +267,11 @@ Admin mutations deferred to **Phase 5**.
 
 ### Tasks
 
-- [ ] **P3.1** `features/services/api` + hooks: `useServices`, `useService(id)`.
-- [ ] **P3.2** `features/availability/api` + `useServiceAvailability(serviceId, dateYmd)` with loading/empty/error.
-- [ ] **P3.3** Stop using `src/data/services.js` for booking/admin flows (marketing Home gallery may keep static images temporarily — mark TODO; do not claim API prices from static file).
-- [ ] **P3.4** Normalize display of `price` string (`"80.00"`) — never assume `$` prefix from API.
-- [ ] **P3.5** Slot picker helper: map `TimeSlot[]` → UI options; on select keep both ISO and naive form for submit.
+- [x] **P3.1** `features/services/api` + hooks: `useServices`, `useService(id)`.
+- [x] **P3.2** `features/availability/api` + `useServiceAvailability(serviceId, dateYmd)` with loading/empty/error.
+- [x] **P3.3** Stop using `src/data/services.js` for booking/admin flows (marketing Home gallery may keep static images temporarily — mark TODO; do not claim API prices from static file).
+- [x] **P3.4** Normalize display of `price` string (`"80.00"`) — never assume `$` prefix from API.
+- [x] **P3.5** Slot picker helper: map `TimeSlot[]` → UI options; on select keep both ISO and naive form for submit.
 
 ### Acceptance
 
@@ -561,7 +563,7 @@ Ask a human before coding if needed:
 | P0 Contract & client | done | openapi-typescript + openapi-fetch; generated schema committed |
 | P1 Roles & remove staff surface | done | Auth still localStorage until P2; staff files kept for P8 |
 | P2 Auth Sanctum | done | Verified: login/register/logout/me + UI redirects |
-| P3 Services & availability | pending | |
+| P3 Services & availability | done | hooks/api + booking/admin catalog decoupled; POST still P4 |
 | P4 Customer appointments | pending | |
 | P5 Admin services CRUD | pending | |
 | P6 Admin appointments & stats | pending | |

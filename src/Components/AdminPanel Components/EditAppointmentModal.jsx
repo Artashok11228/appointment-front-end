@@ -3,7 +3,11 @@ import { X } from 'lucide-react'
 import { useAppointment } from '../../Context/AppointmentContext'
 import { useMessage } from '../../Context/MessageContext'
 import { useStaff } from '../../Context/StaffContext'
-import { services as serviceCatalog } from '../../data/services'
+import { useServices } from '../../features/services/hooks'
+import {
+  formatServicePrice,
+  parseServicePrice,
+} from '../../features/services/lib/formatServicePrice'
 
 // Normalise any date string to YYYY-MM-DD for <input type="date">.
 const convertToInputFormat = (dateStr) => {
@@ -32,6 +36,7 @@ const convertToStorageFormat = (dateStr) => {
 const EditAppointmentModal = ({ appointment, onClose }) => {
     const { updateAppointment } = useAppointment()
     const { getAvailableStaff } = useStaff()
+    const { services: serviceCatalog, loading: servicesLoading, error: servicesError } = useServices()
     const dropdownRef = useRef(null)
     const [isOpen, setIsOpen] = useState(false)
     const [formData, setFormData] = useState({
@@ -72,12 +77,17 @@ const EditAppointmentModal = ({ appointment, onClose }) => {
         setFormData({ ...formData, [name]: value })
     }
 
-    const totalPrice = formData.items.reduce((sum, item) => sum + parseFloat(item.service.price?.replace('$', '') || 0), 0)
+    const totalPrice = formData.items.reduce(
+        (sum, item) => sum + parseServicePrice(item.service.price),
+        0,
+    )
 
     const toggleService = (service) => {
         setFormData(prev => {
             const currentItems = prev.items || []
-            const existsIndex = currentItems.findIndex(item => item.service.name === service.name)
+            const existsIndex = currentItems.findIndex(
+                item => item.service.id === service.id || item.service.name === service.name,
+            )
 
             if (existsIndex >= 0) {
                 const nextItems = currentItems.filter((_, i) => i !== existsIndex)
@@ -96,7 +106,11 @@ const EditAppointmentModal = ({ appointment, onClose }) => {
             return {
                 ...prev,
                 items: [...currentItems, {
-                    service: { name: service.name, price: service.price },
+                    service: {
+                        id: service.id,
+                        name: service.name,
+                        price: formatServicePrice(service.price),
+                    },
                     stylist: {
                         id: chosen.id,
                         name: chosen.name,
@@ -268,41 +282,46 @@ const EditAppointmentModal = ({ appointment, onClose }) => {
 
                         {isOpen && (
                             <div className="absolute top-full left-0 w-full mt-1 bg-obsidian-surface border border-[#333] rounded-lg shadow-xl max-h-60 overflow-y-auto z-50">
-                                {serviceCatalog.map(category => (
-                                    <div key={category.title}>
-                                        <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-champagne bg-obsidian-elevated">
-                                            {category.title}
-                                        </div>
-                                        {category.items.map((service) => {
-                                            const isSelected = formData.items.some(item => item.service.name === service.name)
-                                            return (
-                                                <button
-                                                    key={service.name}
-                                                    type="button"
-                                                    onClick={() => toggleService(service)}
-                                                    className={`w-full px-3 py-2 text-left text-xs font-bold flex items-center justify-between transition-colors ${isSelected
-                                                        ? 'bg-champagne/10 text-champagne'
-                                                        : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                                                        }`}
-                                                >
-                                                    <span>{service.name} — {service.price}</span>
-                                                    <span className={`w-4 h-4 border-2 rounded-sm flex items-center justify-center text-[10px] ${isSelected ? 'border-champagne bg-champagne text-black' : 'border-[#555]'
-                                                        }`}>
-                                                        {isSelected && '✓'}
-                                                    </span>
-                                                </button>
-                                            )
-                                        })}
-                                    </div>
-                                ))}
+                                {servicesLoading && (
+                                    <div className="px-3 py-2 text-xs text-gray-400">Loading services…</div>
+                                )}
+                                {servicesError && (
+                                    <div className="px-3 py-2 text-xs text-red-400" role="alert">{servicesError}</div>
+                                )}
+                                {!servicesLoading && !servicesError && serviceCatalog.length === 0 && (
+                                    <div className="px-3 py-2 text-xs text-gray-400">No services available.</div>
+                                )}
+                                {serviceCatalog.map((service) => {
+                                    const isSelected = formData.items.some(
+                                        item => item.service.id === service.id || item.service.name === service.name,
+                                    )
+                                    const priceLabel = formatServicePrice(service.price)
+                                    return (
+                                        <button
+                                            key={service.id}
+                                            type="button"
+                                            onClick={() => toggleService(service)}
+                                            className={`w-full px-3 py-2 text-left text-xs font-bold flex items-center justify-between transition-colors ${isSelected
+                                                ? 'bg-champagne/10 text-champagne'
+                                                : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                                                }`}
+                                        >
+                                            <span>{service.name} — {priceLabel}</span>
+                                            <span className={`w-4 h-4 border-2 rounded-sm flex items-center justify-center text-[10px] ${isSelected ? 'border-champagne bg-champagne text-black' : 'border-[#555]'
+                                                }`}>
+                                                {isSelected && '✓'}
+                                            </span>
+                                        </button>
+                                    )
+                                })}
                             </div>
                         )}
 
                         {formData.items.length > 0 && (
                             <div className="mt-2 flex flex-wrap gap-2">
                                 {formData.items.map((item, i) => (
-                                    <span key={`${item.service.name}-${i}`} className="inline-flex items-center gap-1.5 bg-champagne/10 border border-champagne/30 text-champagne text-xs font-bold px-2 py-1 rounded-md">
-                                        {item.service.name} — {item.service.price}
+                                    <span key={`${item.service.id ?? item.service.name}-${i}`} className="inline-flex items-center gap-1.5 bg-champagne/10 border border-champagne/30 text-champagne text-xs font-bold px-2 py-1 rounded-md">
+                                        {item.service.name} — {formatServicePrice(item.service.price)}
                                         <button type="button" onClick={() => toggleService(item.service)} className="hover:text-white">✕</button>
                                     </span>
                                 ))}
@@ -317,7 +336,7 @@ const EditAppointmentModal = ({ appointment, onClose }) => {
 
                         {formData.items.length > 0 && (
                             <div className="mt-2 text-xs text-gray-400">
-                                Total: <span className="text-champagne font-bold">${totalPrice}</span>
+                                Total: <span className="text-champagne font-bold">{formatServicePrice(totalPrice)}</span>
                             </div>
                         )}
                     </div>

@@ -3,6 +3,9 @@ import serviceStyling from '../assets/services/service-styling.webp'
 import serviceColoring from '../assets/services/service-coloring.webp'
 import serviceTreatment from '../assets/services/service-treatment.webp'
 
+// TODO(Phase 3+): Marketing / Home gallery only — static images + decorative prices.
+// Booking and admin flows must use features/services API hooks, not this catalog.
+// Do not treat these prices as live API values.
 export const services = [
     {
         title: "Hair Services",

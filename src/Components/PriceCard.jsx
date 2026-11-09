@@ -6,6 +6,8 @@ import { services } from '../data/services'
 /* ═══════════════════════════════════════════════════════════
    PRICE CARD — Premium Carousel
    Design system: Obsidian + Champagne (Elegance theme)
+   TODO(Phase 3+): Uses static marketing catalog (images + decorative prices).
+   Not the API source of truth — booking uses features/services hooks.
    ═══════════════════════════════════════════════════════════ */
 
 /* ── Responsive breakpoint hook (replaces raw window.innerWidth in render) ── */

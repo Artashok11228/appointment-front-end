@@ -2,6 +2,11 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../Context/AuthContext.jsx'
 import LoadingSpinner from './LoadingSpinner';
 
+function normalizeRole(role) {
+    if (role === 'client') return 'customer';
+    return role;
+}
+
 function ProtectedRoute({ children, requiredRole }) {
     const { isAuthenticated, loading, currentUser } = useAuth();
 
@@ -15,7 +20,7 @@ function ProtectedRoute({ children, requiredRole }) {
 
     if (requiredRole) {
         const allowed = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-        const userRole = currentUser?.accountRole || currentUser?.role; // support staff (accountRole) + existing role
+        const userRole = normalizeRole(currentUser?.role);
         if (!userRole || !allowed.includes(userRole)) {
             return <Navigate to="/login" replace />;
         }

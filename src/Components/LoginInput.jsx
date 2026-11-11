@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../Context/AuthContext"
 import { Link, useNavigate } from "react-router-dom"
+import { RATE_LIMIT_MESSAGE } from "../shared/api"
+
+const RATE_LIMIT_LOCK_MS = 60_000
 
 function LoginInput() {
     const [email, setEmail] = useState("")
@@ -9,8 +12,12 @@ function LoginInput() {
     const [message, setMessage] = useState("")
     const [fieldErrors, setFieldErrors] = useState({})
     const [submitting, setSubmitting] = useState(false)
+    const [rateLimitedUntil, setRateLimitedUntil] = useState(0)
+    const [now, setNow] = useState(() => Date.now())
     const { login, currentUser } = useAuth()
     const navigate = useNavigate()
+
+    const isRateLimited = now < rateLimitedUntil
 
     useEffect(() => {
         if (currentUser) {
@@ -22,10 +29,28 @@ function LoginInput() {
         }
     }, [currentUser, navigate]);
 
+    useEffect(() => {
+        if (!rateLimitedUntil) return undefined
+        const tick = () => {
+            const t = Date.now()
+            setNow(t)
+            if (t >= rateLimitedUntil) {
+                setRateLimitedUntil(0)
+            }
+        }
+        tick()
+        const id = setInterval(tick, 1000)
+        return () => clearInterval(id)
+    }, [rateLimitedUntil])
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (currentUser) {
             setMessage("You are already logged in!")
+            return
+        }
+        if (Date.now() < rateLimitedUntil) {
+            setMessage(RATE_LIMIT_MESSAGE)
             return
         }
 
@@ -42,6 +67,12 @@ function LoginInput() {
             return
         }
 
+        if (result.status === 429) {
+            setMessage(RATE_LIMIT_MESSAGE)
+            setRateLimitedUntil(Date.now() + RATE_LIMIT_LOCK_MS)
+            return
+        }
+
         if (result.errors) {
             setFieldErrors(result.errors)
             const emailError = result.errors.email?.[0]
@@ -52,6 +83,16 @@ function LoginInput() {
 
         setMessage(result.error)
     }
+
+    const submitDisabled = submitting || isRateLimited
+    const cooldownSeconds = isRateLimited
+        ? Math.max(1, Math.ceil((rateLimitedUntil - now) / 1000))
+        : 0
+    const submitLabel = submitting
+        ? "Logging in..."
+        : isRateLimited
+            ? `Try later (${cooldownSeconds}s)`
+            : "Login"
 
     return (
         <div className="login-box flex flex-col rounded-lg shadow-lg text-white w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto">
@@ -74,15 +115,14 @@ function LoginInput() {
                             )}
                         </div>
                     </div>
-                    <div className="remember-forgot flex justify-between items-center mt-4 sm:mt-5 mb-10 mx-1">
+                    <div className="remember-forgot flex justify-start items-center mt-4 sm:mt-5 mb-10 mx-1">
                         <label className='flex items-center cursor-pointer'>
                             <input type="checkbox" name="rememberMe" id="rememberMe" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} className='appearance-none w-4 h-4 rounded-full border-4 border-champagne bg-transparent checked:bg-champagne focus:outline-none focus:ring-champagne focus:ring-offset-0 cursor-pointer' />
                             <span className='text-xs sm:text-sm ml-1.5 text-[#454545] tracking-tight font-bold pb-0.5'>Remember Me</span>
                         </label>
-                        <a href="#!" className='text-champagne hover:text-champagne text-xs sm:text-sm font-bold tracking-tight transition-all duration-300 hover:underline'>Forgot Your Password?</a>
                     </div>
                     <div className="submit-button">
-                        <input type="submit" value={submitting ? "Logging in..." : "Login"} disabled={submitting} className="w-full border-4 sm:border-5 border-champagne hover:border-white text-white font-black p-2 sm:p-3 px-4 sm:px-6 hover:bg-[#d28127] transition-colors cursor-pointer uppercase text-base sm:text-lg md:text-xl disabled:opacity-60 disabled:cursor-not-allowed" />
+                        <input type="submit" value={submitLabel} disabled={submitDisabled} className="w-full border-4 sm:border-5 border-champagne hover:border-white text-white font-black p-2 sm:p-3 px-4 sm:px-6 hover:bg-[#d28127] transition-colors cursor-pointer uppercase text-base sm:text-lg md:text-xl disabled:opacity-60 disabled:cursor-not-allowed" />
                     </div>
                     {message && <p className="mt-3 text-center text-champagne">{message}</p>}
                     <div className="no-account mt-5 sm:mt-6 md:mt-7">

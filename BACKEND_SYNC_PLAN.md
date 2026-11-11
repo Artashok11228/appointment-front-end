@@ -347,6 +347,8 @@ List files first; lint after. Do not build admin CRUD in this phase.
 
 ## Phase 5 — Admin services catalog CRUD
 
+**Status:** done — admin services CRUD via generated client; 409 on delete-with-history; 403 via centralized API failure messages.
+
 **Goal:** Admin can manage services per API.
 
 **Depends on:** P2, P3.
@@ -387,6 +389,8 @@ Build admin services CRUD UI + hooks using generated client. Add admin nav. Mini
 
 ## Phase 6 — Admin appointments + stats dashboard
 
+**Status:** done — admin appointments list/filters/pagination + cancel/reschedule; dashboard wired to `getAdminStats`; fake inventory/staff widgets removed.
+
 **Goal:** Admin sees all appointments (filters/pagination) and dashboard from `GET /admin/stats`. Remove fake revenue/inventory/staff widgets that contradict API.
 
 **Depends on:** P2, P4 (appointments shape), P5 optional.
@@ -402,11 +406,11 @@ Build admin services CRUD UI + hooks using generated client. Add admin nav. Mini
 
 ### Tasks
 
-- [ ] **P6.1** Refactor `Pages/Admin/Appointments.jsx` to API pagination + filters; drop stylist filters/columns; statuses only API enums.
-- [ ] **P6.2** View modal: show nested `user` + `service` + ISO times.
-- [ ] **P6.3** Admin cancel/reschedule actions with 409 toasts; no “change stylist” / multi-item edit.
-- [ ] **P6.4** Rebuild `Pages/Admin/Dashboard.jsx` around `getAdminStats` (cards + simple day series + top services). Remove inventory/staff-today blocks or replace only with API-backed data.
-- [ ] **P6.5** Remove admin ability to set arbitrary custom statuses / delete appointment locally (no delete endpoint — use cancel).
+- [x] **P6.1** Refactor `Pages/Admin/Appointments.jsx` to API pagination + filters; drop stylist filters/columns; statuses only API enums.
+- [x] **P6.2** View modal: show nested `user` + `service` + ISO times.
+- [x] **P6.3** Admin cancel/reschedule actions with 409 toasts; no “change stylist” / multi-item edit.
+- [x] **P6.4** Rebuild `Pages/Admin/Dashboard.jsx` around `getAdminStats` (cards + simple day series + top services). Remove inventory/staff-today blocks or replace only with API-backed data.
+- [x] **P6.5** Remove admin ability to set arbitrary custom statuses / delete appointment locally (no delete endpoint — use cancel).
 
 ### Acceptance
 
@@ -427,19 +431,21 @@ Rewire admin appointments list/filters/pagination and dashboard to API. Remove s
 
 ## Phase 7 — Hardening: errors, UX rules, account page, cleanup of auth edge cases
 
+**Status:** done — centralized `toApiFailure` with fixed 403/429 copy; customer lock + completed display-only; weekend date reject; account read-only (no phone); forgot-password removed; login 429 submit lock.
+
 **Goal:** Production-like client behavior for the contract’s status map and booking rules.
 
 **Depends on:** P2–P6 mostly done.
 
 ### Tasks
 
-- [ ] **P7.1** Centralize handlers: 401 logout; 403 toast; 404; 409 message toast; 422 field bind; 429 “try later”.
-- [ ] **P7.2** Disable cancel/reschedule buttons for customers when `!confirmed` or within lock; still show reason.
-- [ ] **P7.3** Date picker: discourage weekends; empty availability copy for closed days.
-- [ ] **P7.4** Account page (`/account`): show `GET /me` data; remove phone/password local update that calls non-existent APIs — if no update endpoint in OpenAPI, make profile **read-only** or ask human before inventing.
-- [ ] **P7.5** Remove “Forgot password” dead link or hide until API exists.
-- [ ] **P7.6** Ensure `completed` appointments are display-only.
-- [ ] **P7.7** Rate-limit UX on login (disable submit briefly on 429).
+- [x] **P7.1** Centralize handlers: 401 logout; 403 toast; 404; 409 message toast; 422 field bind; 429 “try later”.
+- [x] **P7.2** Disable cancel/reschedule buttons for customers when `!confirmed` or within lock; still show reason.
+- [x] **P7.3** Date picker: discourage weekends; empty availability copy for closed days.
+- [x] **P7.4** Account page (`/account`): show `GET /me` data; remove phone/password local update that calls non-existent APIs — if no update endpoint in OpenAPI, make profile **read-only** or ask human before inventing.
+- [x] **P7.5** Remove “Forgot password” dead link or hide until API exists.
+- [x] **P7.6** Ensure `completed` appointments are display-only.
+- [x] **P7.7** Rate-limit UX on login (disable submit briefly on 429).
 
 ### Acceptance
 

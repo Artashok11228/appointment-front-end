@@ -6,7 +6,7 @@ import {
   setAuthToken,
   clearAuthToken,
   setUnauthorizedHandler,
-  ApiError,
+  toApiFailure,
 } from "../shared/api";
 import {
   login as loginRequest,
@@ -33,17 +33,12 @@ function clearLegacyDomainStorage() {
 }
 
 function toAuthFailure(error) {
-  if (error instanceof ApiError) {
-    return {
-      success: false,
-      error: error.message,
-      errors: error.errors,
-      status: error.status,
-    };
-  }
+  const failure = toApiFailure(error, "Something went wrong");
   return {
     success: false,
-    error: error?.message || "Something went wrong",
+    error: failure.message,
+    errors: failure.errors,
+    status: failure.status,
   };
 }
 

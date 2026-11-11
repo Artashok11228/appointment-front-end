@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ApiError } from '../../../shared/api';
+import { toApiErrorMessage } from '../../../shared/api';
 import {
   listAppointments,
   type Appointment,
@@ -77,13 +77,7 @@ export function useAppointments(filters: UseAppointmentsFilters = {}) {
     } catch (err) {
       setAppointments([]);
       setMeta(null);
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : 'Failed to load appointments',
-      );
+      setError(toApiErrorMessage(err, 'Failed to load appointments'));
     } finally {
       setLoading(false);
     }

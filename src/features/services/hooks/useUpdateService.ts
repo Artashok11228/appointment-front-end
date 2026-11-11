@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ApiError } from '../../../shared/api';
+import { toApiFailure } from '../../../shared/api';
 import {
   updateService,
   type Service,
@@ -13,6 +13,7 @@ export type UpdateServiceResult =
       message: string;
       status?: number;
       errors?: Record<string, string[]>;
+      bindFields?: boolean;
     };
 
 export function useUpdateService() {
@@ -29,18 +30,13 @@ export function useUpdateService() {
         const service = await updateService(serviceId, body);
         return { ok: true, service };
       } catch (err) {
-        if (err instanceof ApiError) {
-          return {
-            ok: false,
-            message: err.message,
-            status: err.status,
-            errors: err.errors,
-          };
-        }
+        const failure = toApiFailure(err, 'Failed to update service');
         return {
           ok: false,
-          message:
-            err instanceof Error ? err.message : 'Failed to update service',
+          message: failure.message,
+          status: failure.status,
+          errors: failure.errors,
+          bindFields: failure.bindFields,
         };
       } finally {
         setSubmitting(false);

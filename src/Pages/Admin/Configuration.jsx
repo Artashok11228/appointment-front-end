@@ -1,4 +1,4 @@
-import { User, Mail, Phone } from 'lucide-react'
+import { User, Mail } from 'lucide-react'
 import { useAuth } from '../../Context/AuthContext'
 
 /** Read-only admin account view from GET /me (no profile/password endpoints in OpenAPI). */
@@ -58,18 +58,13 @@ function Configuration() {
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-gray-400 text-xs font-bold uppercase ml-1">Phone</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-champagne-muted">
-                                <Phone size={16} />
-                            </div>
-                            <input
-                                type="tel"
-                                value={currentUser?.phone ?? ''}
-                                readOnly
-                                className="bg-obsidian-elevated border border-[#333] text-champagne-muted text-sm rounded-lg block w-full pl-10 p-3 outline-none cursor-not-allowed"
-                            />
-                        </div>
+                        <label className="text-gray-400 text-xs font-bold uppercase ml-1">Role</label>
+                        <input
+                            type="text"
+                            value={currentUser?.role ?? ''}
+                            readOnly
+                            className="bg-obsidian-elevated border border-[#333] text-champagne-muted text-sm rounded-lg block w-full p-3 outline-none cursor-not-allowed"
+                        />
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ApiError } from '../../../shared/api';
+import { toApiFailure } from '../../../shared/api';
 import {
   rescheduleAppointment,
   type Appointment,
@@ -13,6 +13,7 @@ export type RescheduleResult =
       message: string;
       status?: number;
       errors?: Record<string, string[]>;
+      bindFields?: boolean;
     };
 
 export function useRescheduleAppointment() {
@@ -29,20 +30,13 @@ export function useRescheduleAppointment() {
         const appointment = await rescheduleAppointment(appointmentId, body);
         return { ok: true, appointment };
       } catch (err) {
-        if (err instanceof ApiError) {
-          return {
-            ok: false,
-            message: err.message,
-            status: err.status,
-            errors: err.errors,
-          };
-        }
+        const failure = toApiFailure(err, 'Failed to reschedule appointment');
         return {
           ok: false,
-          message:
-            err instanceof Error
-              ? err.message
-              : 'Failed to reschedule appointment',
+          message: failure.message,
+          status: failure.status,
+          errors: failure.errors,
+          bindFields: failure.bindFields,
         };
       } finally {
         setSubmitting(false);

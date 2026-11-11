@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ApiError } from '../../../shared/api';
+import { toApiFailure } from '../../../shared/api';
 import { cancelAppointment, type Appointment } from '../api';
 
 export type CancelResult =
@@ -17,15 +17,11 @@ export function useCancelAppointment() {
         const appointment = await cancelAppointment(appointmentId);
         return { ok: true, appointment };
       } catch (err) {
-        if (err instanceof ApiError) {
-          return { ok: false, message: err.message, status: err.status };
-        }
+        const failure = toApiFailure(err, 'Failed to cancel appointment');
         return {
           ok: false,
-          message:
-            err instanceof Error
-              ? err.message
-              : 'Failed to cancel appointment',
+          message: failure.message,
+          status: failure.status,
         };
       } finally {
         setSubmitting(false);

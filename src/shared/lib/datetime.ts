@@ -76,3 +76,22 @@ export function isBookingOpenDayUtc(dateYmd: string): boolean {
 
   return (BOOKING_OPEN_DAYS as readonly number[]).includes(utcDay);
 }
+
+export const BOOKING_WEEKDAY_MESSAGE =
+  'Bookings are Mon–Fri only (UTC). Pick a weekday.';
+
+/**
+ * Accept a date-input value only when it is a booking-open weekday (UTC).
+ * Returns `null` when the user picked Sat/Sun so callers can keep the previous value.
+ */
+export function acceptBookingOpenDateInput(
+  dateYmd: string,
+): { ok: true; value: string } | { ok: false; reason: string } {
+  if (!dateYmd) {
+    return { ok: true, value: '' };
+  }
+  if (!isBookingOpenDayUtc(dateYmd)) {
+    return { ok: false, reason: BOOKING_WEEKDAY_MESSAGE };
+  }
+  return { ok: true, value: dateYmd };
+}

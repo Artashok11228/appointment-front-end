@@ -9,5 +9,12 @@ export {
   setUnauthorizedHandler,
   AUTH_TOKEN_KEY,
 } from './client';
-export { ApiError, toApiError } from './errors';
-export type { ApiErrorBody } from './errors';
+export {
+  ApiError,
+  toApiError,
+  toApiFailure,
+  toApiErrorMessage,
+  FORBIDDEN_MESSAGE,
+  RATE_LIMIT_MESSAGE,
+} from './errors';
+export type { ApiErrorBody, ApiFailure } from './errors';

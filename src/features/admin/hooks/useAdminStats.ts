@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ApiError } from '../../../shared/api';
+import { toApiErrorMessage } from '../../../shared/api';
 import { getAdminStats, type AdminStats } from '../api';
 
 export function useAdminStats() {
@@ -16,13 +16,7 @@ export function useAdminStats() {
       setStats(data);
     } catch (err) {
       setStats(null);
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : 'Failed to load admin stats',
-      );
+      setError(toApiErrorMessage(err, 'Failed to load admin stats'));
     } finally {
       setLoading(false);
     }

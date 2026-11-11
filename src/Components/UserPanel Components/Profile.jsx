@@ -55,20 +55,6 @@ function Profile() {
                 </div>
 
                 <div>
-                    <label className="block text-champagne-muted font-semibold mb-1" htmlFor="phone">
-                        Phone Number
-                    </label>
-                    <input
-                        type="tel"
-                        name="phone"
-                        value={currentUser.phone ?? ''}
-                        id="phone"
-                        readOnly
-                        className="w-full font-bold border-4 rounded-md border-[#454545] px-2 md:px-3 py-2 md:py-3 text-sm text-champagne-muted tracking-tight bg-obsidian mt-1.5 cursor-not-allowed"
-                    />
-                </div>
-
-                <div>
                     <label className="block text-champagne-muted font-semibold mb-1" htmlFor="role">
                         Role
                     </label>

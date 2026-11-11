@@ -3,6 +3,8 @@ import { X, Calendar, Check } from 'lucide-react';
 import ConfirmModal from '../../../Components/ConfirmModal';
 import { useMessage } from '../../../Context/MessageContext';
 import {
+  acceptBookingOpenDateInput,
+  BOOKING_WEEKDAY_MESSAGE,
   formatAppointmentDisplay,
   isBookingOpenDayUtc,
 } from '../../../shared/lib';
@@ -68,7 +70,7 @@ export function AdminRescheduleModal({
       return;
     }
     if (!isBookingOpenDayUtc(newDate)) {
-      showMessage('warning', 'Bookings are Mon–Fri only (UTC).');
+      showMessage('warning', BOOKING_WEEKDAY_MESSAGE);
       return;
     }
 
@@ -132,7 +134,12 @@ export function AdminRescheduleModal({
                 type="date"
                 value={newDate}
                 onChange={(e) => {
-                  setNewDate(e.target.value);
+                  const accepted = acceptBookingOpenDateInput(e.target.value);
+                  if (!accepted.ok) {
+                    showMessage('warning', accepted.reason);
+                    return;
+                  }
+                  setNewDate(accepted.value);
                   setSelectedSlot(null);
                   setSlotError(null);
                 }}

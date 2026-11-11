@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ApiError } from '../../../shared/api';
+import { toApiFailure } from '../../../shared/api';
 import { deleteService } from '../api';
 
 export type DeleteServiceResult =
@@ -21,13 +21,11 @@ export function useDeleteService() {
         await deleteService(serviceId);
         return { ok: true };
       } catch (err) {
-        if (err instanceof ApiError) {
-          return { ok: false, message: err.message, status: err.status };
-        }
+        const failure = toApiFailure(err, 'Failed to delete service');
         return {
           ok: false,
-          message:
-            err instanceof Error ? err.message : 'Failed to delete service',
+          message: failure.message,
+          status: failure.status,
         };
       } finally {
         setSubmitting(false);
